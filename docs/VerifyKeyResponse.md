@@ -1,0 +1,9 @@
+# Cielo24.VerifyKeyResponse
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**name** | **String** |  | [optional] 
+
+

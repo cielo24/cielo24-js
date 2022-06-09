@@ -1,0 +1,1029 @@
+openapi: "3.0.0"
+info:
+  description: "The cielo24 Web Services Platform API allows developers to easily integrate transcription, captioning and keyword extraction into their applications without having to use a manual web portal."
+  version: "1.0.0"
+  title: "Cielo24"
+  termsOfService: "https://cielo24.com/terms/"
+  contact:
+    email: "devs@cielo24.com"
+servers:
+- url: "https://api.cielo24.com/api"
+tags:
+- name: "account"
+  description: "All parameters are expected to be safely quoted as is customary for GET query strings. For each session, you will be given an api access token. This token identifies the session, and all additional accesses are made using it. Api tokens expire after the user has been inactive for more than one hour."
+- name: "job"
+  description: "All job control tasks return a task ID which can be queried at any time using task status for information."
+paths:
+  /account/login:
+    post:
+      security: []
+      operationId: login
+      tags:
+      - account
+      description: "Login to the cielo24 API to obtain an API access token for use when calling other methods. Optional arguments may be passed either as HTTP headers or query string parameters. Required arguments must be passed as query string parameters."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /account/logout:
+    post:
+      operationId: logout
+      tags:
+      - account
+      description: "Logout of the current session, invalidating the API token."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      responses:
+        204:
+          description: "Success"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /account/get_settings:
+    get:
+      operationId: get_settings
+      tags:
+      - account
+      description: "Get Account Settings"
+      parameters:
+        - name: v
+          in: query
+          required: true
+          schema:
+            type: integer
+            default: 1
+      responses:
+        200:
+          description: "Test"
+  /account/verify_key:
+    get:
+      operationId: verify_key
+      tags:
+      - account
+      description: "Test Auth"
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      responses:
+        200:
+          description: "Test"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyKeyResponse"
+
+  /job/new:
+    post:
+      operationId: new_job
+      tags:
+      - job
+      description: "Create a new job. A job is a container into which you can upload media and request that transcription be performed. Creating a job is prerequisite for virtually all other methods."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewJobBody"
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewJobResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/add_media:
+    get:
+      operationId: add_media_url
+      tags:
+      - job
+      description: "Add a piece of media to an existing job using a public media url. A job may only have a single piece of media associated with it, attempting to add additional media will return an error code."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      - name: job_id
+        in: query
+        required: true
+        schema:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+      - name: media_url
+        in: query
+        required: true
+        schema:
+          type: string
+          example: http://www.domain.com/video.mp4
+      - name: is_duplicate
+        in: query
+        schema:
+          type: string
+          description: "Allows creating multiple jobs with the same media_url"
+          default: "false"
+          enum: ["true", "false"]
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMediaResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: add_media_file
+      tags:
+      - job
+      description: "Add a piece of media to an existing job using a local file. No content-type should be included in the HTTP header. The media should be uploaded as raw binary, no encoding (base64, hex, etc) is required. Chunk-transfer encoding is NOT supported. File size is limited to 10 gb"
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      - name: job_id
+        in: query
+        required: true
+        schema:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+      - name: is_duplicate
+        in: query
+        schema:
+          type: string
+          description: "Allows creating multiple jobs with the same media_url"
+          default: "false"
+          enum: ["true", "false"]
+      - name: Content-Length
+        in: header
+        required: true
+        schema:
+          type: integer
+          maximum: 10737418239
+      requestBody:
+        required: true
+        content:
+          video/mp4:
+            schema:
+              type: string
+              format: binary
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMediaResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/perform_transcription:
+    post:
+      operationId: perform_transcription
+      tags:
+      - job
+      description: "Request that transcription be performed on the specified job. A callback URL, if specified, will be called when the transcription is complete. See [callback documentation](https://cielo24.readthedocs.io/en/latest/basics.html#callbacks-label) for details."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PerformTranscriptionBody"
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformTranscriptionResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/perform_translation:
+    post:
+      operationId: perform_translation
+      tags:
+      - job
+      description: "Request that orders a new Translation language for a video that has been previously Transcribed and/or Translated. The New Job ID and job target language will be returned upon completion."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      - name: job_id
+        in: query
+        required: true
+        schema:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+      - name: target_languages
+        in: query
+        required: true
+        description: The language(s) being ordered (Any RFC 5646 language code) separated by comma (,)
+        schema:
+          type: string
+          example: fr,de
+      - name: approve_uplevel
+        in: query
+        schema:
+          type: string
+          enum: [yes, no, t, f, "true", "false"]
+          example: yes
+      responses:
+        201:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformTranslationResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/get_caption:
+    get:
+      operationId: get_caption
+      tags:
+      - job
+      description: "Get the caption file for a job. The job must have completed transcription before a caption can be downloaded."
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      - name: job_id
+        in: query
+        required: true
+        schema:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+      - name: caption_format
+        in: query
+        required: true
+        schema:
+          type: string
+          example: SRT
+          enum: [DFXP, ECHO, QT, SAMI, SBV, SCC, SRT, TPM, TRANSCRIPT, TWX, WEB_VTT]
+      - name: build_url
+        in: query
+        description: "Rather than returning the file, return a permanent URL to the file."
+        schema:
+          type: string
+          default: "false"
+          example: "false"
+          enum: ["true", "false"]
+      - name: caption_words_min
+        in: query
+        description: "Minimum number of words allowed in a caption."
+        schema:
+          type: integer
+          default: 1
+          example: 3
+      - name: caption_by_sentence
+        in: query
+        description: "When true, puts each sentence into its own caption. When false, more than one sentence may appear in a single caption."
+        schema:
+          type: string
+          default: "true"
+          example: "false"
+          enum: ["true", "false"]
+      - name: characters_per_caption_line
+        in: query
+        description: "Maximum number of characters to be displayed on each caption line."
+        schema:
+          type: integer
+          default: 42
+          example: 30
+      - name: dfxp_header
+        in: query
+        description: "Allows you to specify a custom header for your DFXP caption file. The header should be the entire contents of the header including the opening and closing tags. Ignored if caption_format does not equal DFXP."
+        schema:
+          type: string
+          default: ""
+          example: <head></head>
+      - name: disallow_dangling
+        in: query
+        description: "Will prevent captions from having the last word in a sentence start a new line. Last words will ALWAYS be kept on the same line, even if it breaks the characters_per_caption_line option."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: display_effects_speaker_as # TODO: Add possible options
+        in: query
+        description: "Determines what speaker name should used for sound effects."
+        schema:
+          type: string
+          default: Effects
+          example: Sounds
+      - name: display_speaker_id
+        in: query
+        description: 'Determines the way speakers are identified in the captions. Choose "no" to not display speaker identities at all: ">> example" Choose "number" to display only the speaker number: ">> Speaker 1: example" Choose "name" to display the speaker name: ">> John Doe: example". If you choose "name", the speaker number will be displayed if the name is not available.'
+        schema:
+          type: string
+          default: name
+          example: number
+          enum: ["no", number, name]
+      - name: iwp_name
+        in: query
+        description: "The named version of element list to generate the transcript from. If not specified, the transcript will be generated from the latest version."
+        schema:
+          type: string
+          default: ""
+          example: MECHANICAL
+          enum: [PREMIUM, INTERIM_PROFESSIONAL, PROFESSIONAL, SPEAKER_ID, FINAL, MECHANICAL, CUSTOMER_APPROVED_RETURN, CUSTOMER_APPROVED_TRANSLATION]
+      - name: elementlist_version
+        in: query
+        description: "The version of element list to generate the captions from. If not specified, the caption will be generated from the latest version. (ISO 8601 Date String)"
+        schema:
+          type: string
+          default: ""
+          example: "2014-07-31T12:35:52.324389"
+      - name: emit_speaker_change_tokens_as
+        in: query
+        description: "Determine what characters to use to denote speaker changes."
+        schema:
+          type: string
+          default: ">>"
+          example: "-->"
+      - name: force_case
+        in: query
+        description: "Force the contents of the captions to be all UPPER or lower case. If blank, the case of the captions is not changed."
+        schema:
+          type: string
+          default: ""
+          example: lower
+          enum: ["", lower, upper]
+      - name: include_dfxp_metadata
+        in: query
+        description: "When true, and the caption format requested is DFXP, the jobs name, ID and language will be added to the DFXP metadata header. When false, these data are omitted from the header. Ignored if caption_format does not equal DFXP."
+        schema:
+          type: string
+          default: "true"
+          example: "false"
+          enum: ["true", "false"]
+      - name: layout_target_caption_length_ms
+        in: query
+        description: "Captions generated will, on average, be this duration. However, they may vary significantly based on other parameters you set."
+        schema:
+          type: integer
+          default: 5000
+          example: 4000
+      - name: line_break_on_sentence
+        in: query
+        description: "Inserts a line break in between sentences that are in the same caption."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: line_ending_format
+        in: query
+        description: "Determine the end of line (EOL) character to use for the captions."
+        schema:
+          type: string
+          default: UNIX
+          example: OSX
+          enum: [UNIX, OSX, WINDOWS]
+      - name: lines_per_caption
+        in: query
+        description: "Number of lines to be displayed for each caption."
+        schema:
+          type: integer
+          default: 2
+          example: 3
+      - name: mask_profanity
+        in: query
+        description: "Replace profanity with asterisks."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: maximum_caption_duration
+        in: query
+        description: "No captions longer than this (in milliseconds) will be produced. If not specified, there is no maximum."
+        schema:
+          type: integer
+          example: 10000
+      - name: merge_gap_interval
+        in: query
+        description: "Captions with a gap between them that is smaller than this (in milliseconds) will have their start and/or end times changed so there is no time gap between the captions."
+        schema:
+          type: integer
+          default: 1000
+          example: 1500
+      - name: minimum_caption_length_ms
+        in: query
+        description: "Extends the duration of short captions to the this minimum length. Additional time is taken from later caption blocks to meet this minimum time."
+        schema:
+          type: integer
+          example: 1500
+      - name: minimum_gap_between_captions_ms
+        in: query
+        description: "Adds a minimum time between captions such as there will always be some time between captions where no text is displayed. When captions are very close together, time will be removed from the caption duration to make the gap."
+        schema:
+          type: integer
+          example: 100
+      - name: qt_seamless
+        in: query
+        description: "Does not put time gaps of any kind between caption blocks. Ignored if caption_format does not equal QT."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: remove_disfluencies
+        in: query
+        description: 'Remove verbal disfluencies from the generated transcript. Common disfluencies such as "um" and "ah" are removed while maintaining appropriate punctuation.'
+        schema:
+          type: string
+          default: "true"
+          example: "false"
+          enum: ["true", "false"]
+      - name: remove_sounds_list
+        in: query
+        description: 'A list of sounds to not show in the caption. This is a JSON style list, and should look like ["MUSIC", "LAUGH"]. Ignored if remove_sound_references is true.'
+        schema:
+          type: array
+          default: []
+          example: [MUSIC, LAUGH]
+          items:
+            type: string
+            enum: [UNKNOWN, INAUDIBLE, CROSSTALK, MUSIC, NOISE, LAUGH, COUGH, FOREIGN, BLANK_AUDIO, APPLAUSE, BLEEP, ENDS_SENTENCE]
+      - name: remove_sound_references
+        in: query
+        description: "Remove ALL non-verbal sound and noise references from the generated transcript. Sounds and unidentified noises are depicted in the caption as [SOUND], [COUGH] and [NOISE]. If this parameter is set, these identifiers are omitted from the caption."
+        schema:
+          type: string
+          default: "true"
+          example: "false"
+          enum: ["true", "false"]
+      - name: replace_slang
+        in: query
+        description: 'Replace common slang terms from the generated transcript. Common replacements are "want to" for "wanna", "going to" for "gonna", etc.'
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: silence_max_ms
+        in: query
+        description: "If there is a interval of silence in the middle of a sentence longer than this, then the caption will be split."
+        schema:
+          type: integer
+          default: 2000
+          example: 1000
+      - name: single_speaker_per_caption
+        in: query
+        description: "When true, puts each speaker into its own caption. When false, more than one speaker may appear in a single caption."
+        schema:
+          type: string
+          default: "true"
+          example: "false"
+          enum: ["true", "false"]
+      - name: sound_boundaries
+        in: query
+        description: "Specifies the characters to surround sound references with. The default will generate sound references that look like this: [MUSIC]."
+        schema:
+          type: array
+          default: ["[", "]"]
+          example: ["(", ")"]
+          minLength: 2
+          maxLength: 2
+          items:
+            type: string
+      - name: sound_threshold
+        in: query
+        description: "Sound references that are longer than this threshold will be made their own caption entirely, and will not have any text included with them. If not set, Sound references will be included back to back with text no matter the duration of the sound."
+        schema:
+          type: integer
+          example: 5000
+      - name: sound_tokens_by_caption
+        in: query
+        description: "If true, all sound references will always be in their own caption. If false, more than one sound reference may appear in a single caption."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: sound_tokens_by_line
+        in: query
+        description: "If true, all sound references will always be in their own line. If false, more than one sound reference may appear in a single line."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: sound_tokens_by_caption_list
+        in: query
+        description: "If non-empty, the specified sound references will always be in their own caption. If empty, more than one sound reference may appear in a single caption. Ignored if sound_tokens_by_caption is true."
+        schema:
+          type: array
+          default: [BLANK_AUDIO, MUSIC]
+          example: []
+          items:
+            type: string
+            enum: [UNKNOWN, INAUDIBLE, CROSSTALK, MUSIC, NOISE, LAUGH, COUGH, FOREIGN, BLANK_AUDIO, APPLAUSE, BLEEP, ENDS_SENTENCE]
+      - name: sound_tokens_by_line_list
+        in: query
+        description: "If non-empty, the specified sound references will always be in their own line. If empty, more than one sound reference may appear in a single line. Ignored if sound_tokens_by_line is true."
+        schema:
+          type: array
+          default: [BLANK_AUDIO, MUSIC]
+          example: [NOISE]
+          items:
+            type: string
+            enum: [UNKNOWN, INAUDIBLE, CROSSTALK, MUSIC, NOISE, LAUGH, COUGH, FOREIGN, BLANK_AUDIO, APPLAUSE, BLEEP, ENDS_SENTENCE]
+      - name: speaker_on_new_line
+        in: query
+        description: "If true, a speaker change will cause a new caption to be made. If false, multiple speakers may appear in a single caption."
+        schema:
+          type: string
+          default: "true"
+          example: "false"
+          enum: ["true", "false"]
+      - name: srt_format
+        in: query
+        description: >
+          If the caption format is SRT, determines what the caption
+          blocks will look like. The default, prints caption blocks
+          that look like this:
+
+            1:
+            00:00:06,060 --> 00:00:16,060
+            This is the caption text.
+
+          You can alter the caption block by re-arranging or removing
+          the substitution string values, shown enclosed in braces "{}"
+          in the default value below. Substitution strings may used
+          more than once if desired. Any text that is not a substitution
+          string will be displayed as written. To add new lines, include
+          a \n. Note, you may need to escape the \n with an extra
+          backslash when encoding the request.
+        schema:
+          type: string
+          default: "{caption_number:d}\\n{start_hour:02d}:{start_minute:02d}:{start_second:02d},{start_millisecond:03d} -->{end_hour:02d}:{end_minute:02d}:{end_second:02d},{end_millisecond:03d}\\n{caption_text}\\n\\n"
+          example: "{caption_number:d}\\n{start_hour:02d}:{start_minute:02d}:{start_second:02d},{start_millisecond:03d} -->{end_hour:02d}:{end_minute:02d}:{end_second:02d},{end_millisecond:03d}\\n{caption_text}\\n\\n"
+      - name: strip_square_brackets
+        in: query
+        description: "Removes all square brackets like '[' or ']' from captions. By default square brackets surround sound references like '[MUSIC]', but they may exist as part of the caption text as well."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: utf8_mark
+        in: query
+        description: "Adds a utf8 bytemark to the beginning of the caption. This should only be used if the system you are loading the caption files into needs a byte marker. The vast majority of systems do not."
+        schema:
+          type: string
+          default: "false"
+          example: "true"
+          enum: ["true", "false"]
+      - name: replace_english_spelling
+        in: query
+        description: >
+          Replaces English spelling with location accurate spelling. i.e. Color --> Colour
+
+
+          A: American
+
+
+          B: British
+
+
+          Z: British ize
+
+
+          U: Australian
+
+
+          C: Canadian
+
+
+        schema:
+          type: string
+          default: A
+          example: B
+          enum: [A,B,Z,U,C]
+      responses:
+        200:
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+            
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/info:
+    get:
+      operationId: job_info
+      tags:
+      - job
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      - name: job_id
+        in: query
+        required: true
+        schema:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobInfoResponse"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /job/authorize:
+    post:
+      operationId: authorize_job
+      tags:
+      - job
+      description: 'Authorize an existing job. If your account has the "customer authorization" feature enabled (it is not enabled by default) jobs you create will be held in the "Authorizing" state until you call this method. Calling this method on a job that is not the "Authorizing" state has no effect and will return success. Please contact support@cielo24.com to enable the "customer authorization" feature.'
+      parameters:
+      - name: v
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+      - name: job_id
+        in: query
+        required: true
+        schema:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+      responses:
+        200:
+          description: "Success"
+        400:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+          description: "The username associated with this account"
+        password:
+          type: string
+          description: "The password associated with this account"
+          format: password
+        securekey:
+          type: string
+          description: "A long term security key generated via generate_api_key"
+    LoginResponse:
+      type: object
+      properties:
+        api_token:
+          type: string
+    VerifyKeyResponse:
+      type: object
+      properties:
+        name:
+          type: string
+    NewJobBody:
+      type: object
+      properties:
+        job_name:
+          type: string
+          description: "A human readable identifier for the job"
+        language:
+          type: string
+          description: "Native job language"
+          example: en (Any RFC 5646 language code)
+        external_id:
+          type: string
+          description: "An identifier you want to associate with this job"
+          example: 12345
+        username:
+          type: string
+          description: "Create the job in specified sub-account"
+          example: my_sub_account
+        requestor:
+          type: string
+          description: "An requestor you want to associate with this job"
+          example: test_requestor
+        reference:
+          type: string
+          description: "An reference you want to associate with this job"
+          example: test_reference
+        expected_speakers:
+          type: integer
+          description: "Amount of speakers that the video will have"
+          example: 40
+        is_duplicate:
+          type: string
+          description: "Allows creating multiple jobs with the same external_id"
+          default: "false"
+          enum: ["true", "false"]
+    NewJobResponse:
+      type: object
+      properties:
+        JobId:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+        TaskId:
+          type: string
+          example: f79fcf4cccfe4402826190ca13a7c0d4
+    AddMediaResponse:
+      type: object
+      properties:
+        TaskId:
+          type: string
+          example: f79fcf4cccfe4402826190ca13a7c0d4
+    PerformTranscriptionBody:
+      type: object
+      required:
+      - job_id
+      - transcription_fidelity
+      - priority
+      properties:
+        job_id:
+          type: string
+          description: "The ID of the job"
+          example: 0fbd6015910e42dca25a863c4925d77c
+        transcription_fidelity:
+          type: string
+          description: "The desired fidelity of the transcription"
+          enum: [MECHANICAL, PREMIUM, PROFESSIONAL]
+        priority:
+          type: string
+          description: "The desired priority of the transcription"
+          enum: [STANDARD, PRIORITY]
+        callback_url:
+          type: string
+          description: "A URL with query string which will be called on completion. If submitting the callback_url as a query string parameter, rather than a value in the POST data, the callback_url should be URL encoded. The callback URL can contain tags that will be replaced with job specific data when the callback is called. Below is the list of tags that are supported: {job_id}, {job_name}, {elementlist_version}, {iwp_name} (The Interim Work Product name associated with this ElementList version)"
+          example: http://www.domain.com/path
+        options:
+          type: string
+          description: "A job options json. See JobOptions object for details."
+          example: '{"notes": "test"}'
+        target_language:
+          type: string
+          description: "An RFC 5646 language code to translate this job into. If not specified, then no translation will be performed. If specified, but the language code specified matches the language code on the job request, then no translation will be performed."
+          example: en (Any RFC 5646 language code)
+        turnaround_hours:
+          type: integer
+          description: "The number of hours after submission that the job will be returned. If not specified, it will be set to a default based on the value of the priority parameter. The defaults are 24 and 48 for the PRIORITY and STANDARD priorities respectively. If you request a smaller number of hours than the default for the priority you have selected, the priority will be automatically changed. For example if you request a turnaround_hours of 16 with a priority of STANDARD, the priority will be automatically, and silently, changed to PRIORITY."
+          example: 36
+    PerformTranscriptionResponse:
+      type: object
+      properties:
+        TaskId:
+          type: string
+    PerformTranslationResponse:
+      type: object
+      properties:
+        translation_job_ids:
+          type: array
+          example:
+          - 0fbd6015910e42dca25a863c4925d77c
+          items:
+            type: string
+        message:
+          type: string
+          example: "Child Translation Created for de. Child Translation already exists for fr"
+    JobInfoResponse:
+      type: object
+      properties:
+        JobId:
+          type: string
+          example: 0fbd6015910e42dca25a863c4925d77c
+        JobName:
+          type: string
+          example: sample_job_name
+        MediaLengthSeconds:
+          type: number
+          example: 65.3
+        ExternalId:
+          type: string
+          description: "Depends on third-party integrations."
+          example: "12345"
+        Priority:
+          type: string
+          enum: [STANDARD, PRIORITY]
+          example: PRIORITY
+        Fidelity:
+          type: string
+          enum: [MECHANICAL, PREMIUM, PROFESSIONAL]
+          example: PREMIUM
+        JobStatus:
+          type: string
+          enum: [Authorizing, Pending, In Process, Complete, Media Failure, Reviewing]
+          example: In Process
+        Options:
+          $ref: "#/components/schemas/JobOptions"
+        ReturnTargets:
+          type: object
+        SourceLanguage:
+          type: string
+          description: "RFC 5646 Language Code"
+          example: en
+        TargetLanguage:
+          type: string
+          description: "RFC 5646 Language Code"
+          example: fr
+        CreationDate:
+          type: string
+          description: "ISO 8601 Date String"
+          example: "2014-07-31T12:35:52.324389"
+        StartDate:
+          type: string
+          description: "ISO 8601 Date String"
+          example: "2014-07-31T12:35:52.324389"
+        DueDate:
+          type: string
+          description: "ISO 8601 Date String"
+          example: "2014-07-31T12:35:52.324389"
+        CompletedDate:
+          type: string
+          description: "ISO 8601 Date String"
+          example: "2014-07-31T12:35:52.324389"
+        ReturnDate:
+          type: string
+          description: "ISO 8601 Date String"
+          example: "2014-07-31T12:35:52.324389"
+        AuthorizationDate:
+          type: string
+          description: "ISO 8601 Date String"
+          example: "2014-07-31T12:35:52.324389"
+        JobDifficulty:
+          type: string
+          enum: [Good, Bad, Unknown]
+          example: Good
+    JobOptions:
+      type: object
+      properties:
+        customer_approval_steps:
+          type: array
+          description: "Requires your approval of a job at specified points in the workflow. When the job is ready for approval you will be emailed a link that will take you to a web based tool you can use to view, edit and approve the job. You may request approval at two points in the workflow: before translation and before the job is returned."
+          default: []
+          items:
+            type: string
+            enum: [TRANSLATION, RETURN]
+        customer_approval_tool:
+          type: string
+          description: "Determines which web based tool to use for viewing, editing and approving jobs."
+          default: CIELO24
+          enum: [AMARA, CIELO24]
+        custom_metadata:
+          type: object
+          description: "A JSON dictionary of key value pairs. These will be used as substitution strings when building the callback URL and custom DFXP caption header."
+          example: '{"key":"value"}'
+        notes:
+          description: "Allows you to provide text that will be displayed to the transcriber when the job is processed. An HTML included will be escaped."
+        return_iwp:
+          type: array
+          description: "Allows you to receive additional callbacks when interim versions of the job are completed. If you specified a callback_url, then a callback will sent for FINAL regardless of the value of this option."
+          default: []
+          items:
+            $ref: "#/components/schemas/IWPEnum"
+        generate_media_intelligence_iwp:
+          type: array
+          description: "Requests that media intelligence be generated for the specified interim/final versions of the transcript. Media intelligence data is added to the ElementList and can be retrieve using the get_elementlist API call. See [ElementList](https://cielo24.readthedocs.io/en/latest/output_formats/elementlist.html#media-intelligence-label) for details."
+          default: []
+          items:
+            $ref: "#/components/schemas/IWPEnum"
+        speaker_id:
+          type: string
+          description: "Requests that speaker names be identified."
+          default: "false"
+          enum: ["true", "false"]
+        audio_description:
+          type: string
+          description: "Requests that all noises and sounds be identified."
+          default: "false"
+          enum: ["true", "false"]
+        on_screen_text:
+          type: string
+          description: "Requests that any text that appears in the media be added to the transcription."
+          default: "false"
+          enum: ["true", "false"]
+        music_lyrics:
+          type: string
+          description: "Requests that lyrics to songs be transcribed instead of labeled [MUSIC]."
+          default: "false"
+          enum: ["true", "false"]
+        custom_special_handling:
+          type: string
+          description: "Requests that transcribers follow submitted instruction set."
+          default: "false"
+          enum: ["true", "false"]
+    IWPEnum:
+      type: string
+      enum: [PREMIUM, INTERIM_PROFESSIONAL, PROFESSIONAL, SPEAKER_ID, FINAL, MECHANICAL, CUSTOMER_APPROVED_RETURN, CUSTOMER_APPROVED_TRANSLATION]
+    ErrorResponse:
+      type: object
+      properties:
+        ErrorType:
+          type: string
+        ErrorComment:
+          type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: api_token
+security:
+  - ApiKeyAuth: []
