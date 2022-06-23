@@ -45,6 +45,8 @@ Name | Type | Description | Notes
 
 * `PROFESSIONAL` (value: `"PROFESSIONAL"`)
 
+* `HIGH` (value: `"HIGH"`)
+
 
 
 

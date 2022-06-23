@@ -137,7 +137,7 @@ Class | Method | HTTP request | Description
 *Cielo24.JobApi* | [**jobInfo**](docs/JobApi.md#jobInfo) | **GET** /job/info | 
 *Cielo24.JobApi* | [**newJob**](docs/JobApi.md#newJob) | **POST** /job/new | 
 *Cielo24.JobApi* | [**performTranscription**](docs/JobApi.md#performTranscription) | **POST** /job/perform_transcription | 
-*Cielo24.JobApi* | [**performTranslation**](docs/JobApi.md#performTranslation) | **POST** /job/perform_translation | 
+*Cielo24.JobApi* | [**performTranslation**](docs/JobApi.md#performTranslation) | **POST** /job/translate | 
 
 
 ## Documentation for Models

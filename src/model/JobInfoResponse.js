@@ -256,7 +256,13 @@ JobInfoResponse['FidelityEnum'] = {
      * value: "PROFESSIONAL"
      * @const
      */
-    "PROFESSIONAL": "PROFESSIONAL"
+    "PROFESSIONAL": "PROFESSIONAL",
+
+    /**
+     * value: "HIGH"
+     * @const
+     */
+    "HIGH": "HIGH"
 };
 
 

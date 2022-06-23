@@ -538,7 +538,7 @@ export default class JobApi {
       let accepts = ['application/json'];
       let returnType = PerformTranslationResponse;
       return this.apiClient.callApi(
-        '/job/perform_translation', 'POST',
+        '/job/translate', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,
         authNames, contentTypes, accepts, returnType, null, callback
       );
